@@ -48,3 +48,9 @@ ENV/
 screenshots/
 results/
 .claude/
+AGENTS.md
+ENUNCIADO.md
+TODO.md
+
+# Local learning workspace, not part of the final delivery
+.learning/
