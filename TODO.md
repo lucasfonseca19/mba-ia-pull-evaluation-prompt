@@ -72,7 +72,7 @@ Checklist operacional para acompanhar a entrega do projeto "Pull, Otimizacao e A
 - [x] Adicionar descricao ao prompt publicado.
 - [x] Adicionar metadados com tecnicas utilizadas.
 - [x] Executar `python src/push_prompts.py`.
-- [ ] Verificar no dashboard do LangSmith se o prompt foi publicado.
+- [x] Verificar no dashboard do LangSmith se o prompt foi publicado. (Evidencia: `evidencias/06-langsmith-prompt-v2-publico.png`)
 - [x] Deixar o prompt publico no LangSmith.
 
 ## Avaliacao e Iteracoes
@@ -107,39 +107,39 @@ Checklist operacional para acompanhar a entrega do projeto "Pull, Otimizacao e A
 
 ## README.md
 
-- [ ] Atualizar README.md com visao geral do projeto.
+- [x] Atualizar README.md com visao geral do projeto.
 - [x] Criar secao "Tecnicas Aplicadas (Fase 2)".
 - [x] Explicar as tecnicas avancadas escolhidas.
 - [x] Justificar a escolha de cada tecnica.
 - [x] Incluir exemplos praticos de aplicacao.
-- [ ] Criar secao "Resultados Finais".
-- [ ] Inserir link publico do dashboard LangSmith.
-- [ ] Inserir screenshots das avaliacoes.
-- [ ] Criar tabela comparativa v1 versus v2.
-- [ ] Criar secao "Como Executar".
-- [ ] Documentar pre-requisitos e dependencias.
-- [ ] Documentar comandos para pull, push, avaliacao e testes.
+- [x] Criar secao "Resultados Finais".
+- [ ] Inserir link publico do dashboard LangSmith. (README contem link do projeto e screenshots; compartilhamento publico do dashboard ainda nao confirmado)
+- [x] Inserir screenshots das avaliacoes.
+- [x] Criar tabela comparativa v1 versus v2.
+- [x] Criar secao "Como Executar".
+- [x] Documentar pre-requisitos e dependencias.
+- [x] Documentar comandos para pull, push, avaliacao e testes.
 - [x] Documentar configuracao do provider alternativo OpenCode Go no README.md.
 
 ## Evidencias LangSmith
 
 - [ ] Publicar ou obter link publico do dashboard LangSmith.
-- [ ] Garantir que o dataset de avaliacao com 15 exemplos esteja visivel.
-- [ ] Garantir que as execucoes do prompt v2 estejam visiveis.
+- [x] Garantir que o dataset de avaliacao com 15 exemplos esteja visivel. (Evidencia: `evidencias/05-langsmith-dataset-15-exemplos.png`)
+- [x] Garantir que as execucoes do prompt v2 estejam visiveis. (Evidencias: `evidencias/04-langsmith-projeto-traces.png` e links publicos dos 3 traces no `README.md`)
 - [x] Garantir que as notas >= 0.8 estejam visiveis. (Iteracao 2: Helpfulness 0.95, Correctness 0.92, F1 0.87, Clarity 0.95, Precision 0.96, media 0.9298)
-- [ ] Capturar screenshots das avaliacoes.
-- [ ] Capturar ou documentar tracing detalhado de pelo menos 3 exemplos.
+- [x] Capturar screenshots das avaliacoes. (Evidencias: `evidencias/evidencia_eval_terminal_1.png`, `evidencias/evidencia_eval_terminal_2.png`)
+- [x] Capturar ou documentar tracing detalhado de pelo menos 3 exemplos. (Simples, medio e complexo documentados no `README.md` com links publicos gerados pelo Share do LangSmith)
 
 ## Entrega Final
 
 - [ ] Confirmar que o repositorio GitHub esta publico.
 - [ ] Confirmar que todo codigo-fonte implementado esta no repositorio.
-- [ ] Confirmar que `prompts/bug_to_user_story_v2.yml` esta completo e funcional.
-- [ ] Confirmar que `README.md` esta atualizado.
-- [ ] Confirmar que evidencias do LangSmith estao linkadas ou anexadas.
-- [ ] Confirmar que os testes passam.
-- [ ] Confirmar que todas as metricas estao >= 0.8.
-- [ ] Revisar se nenhum dataset de avaliacao foi alterado.
+- [x] Confirmar que `prompts/bug_to_user_story_v2.yml` esta completo e funcional.
+- [x] Confirmar que `README.md` esta atualizado.
+- [x] Confirmar que evidencias do LangSmith estao linkadas ou anexadas.
+- [x] Confirmar que os testes passam. (`venv/bin/python -m pytest -q`: 6 passed)
+- [x] Confirmar que todas as metricas estao >= 0.8.
+- [x] Revisar se nenhum dataset de avaliacao foi alterado.
 - [ ] Fazer revisao final antes da submissao.
 
 ## Pendencias de informacao
