@@ -206,6 +206,25 @@ def get_llm(model: Optional[str] = None, temperature: float = 0.0):
             api_key=api_key
         )
 
+    elif provider == 'opencode_go':
+        from langchain_openai import ChatOpenAI
+
+        api_key = os.getenv('OPENCODE_GO_API_KEY')
+        if not api_key:
+            raise ValueError(
+                "OPENCODE_GO_API_KEY não configurada no .env\n"
+                "Obtenha sua chave no OpenCode Go e configure essa variável."
+            )
+
+        base_url = os.getenv('OPENCODE_GO_BASE_URL', 'https://opencode.ai/zen/go/v1')
+
+        return ChatOpenAI(
+            model=model_name,
+            temperature=temperature,
+            api_key=api_key,
+            base_url=base_url
+        )
+
     elif provider == 'google':
         from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -225,7 +244,7 @@ def get_llm(model: Optional[str] = None, temperature: float = 0.0):
     else:
         raise ValueError(
             f"Provider '{provider}' não suportado.\n"
-            f"Use 'openai' ou 'google' na variável LLM_PROVIDER do .env"
+            f"Use 'openai', 'google' ou 'opencode_go' na variável LLM_PROVIDER do .env"
         )
 
 

@@ -98,6 +98,24 @@ from langchain_google_genai import ChatGoogleGenerativeAI  # LLM Gemini
 - **Modelo de LLM para avaliação**: `gemini-2.5-flash`
 - **Limite:** 15 req/min, 1500 req/dia
 
+## OpenCode Go (provider alternativo compatível com OpenAI)
+
+Além de OpenAI e Gemini, este projeto suporta `opencode_go` como provider alternativo para avaliação, usando o endpoint OpenAI-compatible do OpenCode Go.
+
+Use esta opção quando o limite gratuito do Gemini não for suficiente para rodar a avaliação completa com 15 exemplos.
+
+Configuração no `.env`:
+
+```env
+LLM_PROVIDER=opencode_go
+OPENCODE_GO_API_KEY=sua-chave-aqui
+OPENCODE_GO_BASE_URL=https://opencode.ai/zen/go/v1
+LLM_MODEL=deepseek-v4-flash
+EVAL_MODEL=deepseek-v4-flash
+```
+
+O modelo `deepseek-v4-flash` foi escolhido por ser um modelo disponível no OpenCode Go com endpoint `/chat/completions`, compatível com o client `ChatOpenAI` usado pelo LangChain.
+
 ---
 
 ## Requisitos
@@ -241,7 +259,7 @@ mba-ia-pull-evaluation-prompt/
 - `src/metrics.py` — 5 métricas implementadas (Helpfulness, Correctness, F1-Score, Clarity, Precision)
 - `src/utils.py` — Funções auxiliares
 - `datasets/bug_to_user_story.jsonl` — Dataset com 15 bugs (5 simples, 7 médios, 3 complexos)
-- Suporte multi-provider (OpenAI e Gemini)
+- Suporte multi-provider (OpenAI, Gemini e OpenCode Go via endpoint compatível com OpenAI)
 
 ## Repositórios úteis
 
@@ -322,6 +340,66 @@ python src/evaluate.py
   - Dataset de avaliação com 15 exemplos
   - Execuções dos prompts v2 (otimizados) com notas ≥ 0.8
   - Tracing detalhado de pelo menos 3 exemplos
+
+## Técnicas Aplicadas (Fase 2)
+
+### 1. Few-shot Learning (obrigatória)
+
+**O que é:** Incluir exemplos concretos de entrada/saída no prompt para que o modelo aprenda o padrão desejado por demonstração, em vez de depender apenas de instruções abstratas.
+
+**Por que escolhemos:** O prompt v1 não tinha nenhum exemplo. Sem referência de formato e profundidade, o modelo gerava saídas inconsistentes. Com 3 exemplos (um bug simples, um bug médio de lógica de negócio e um bug complexo com múltiplas falhas), o modelo entende o nível de detalhe, a estrutura e o estilo esperados para diferentes complexidades.
+
+**Como aplicamos:** No `user_prompt` de `bug_to_user_story_v2.yml`, incluímos exemplos antes da tarefa real: o Exemplo 1 cobre um bug simples de validação, o Exemplo 2 cobre um bug médio com cálculo e contexto técnico, e o Exemplo 3 cobre um bug complexo com segurança, integração, regra de negócio e UX. Cada exemplo mostra a "Entrada" (relato do bug) e a "Saída" esperada.
+
+### 2. Role Prompting (adicional)
+
+**O que é:** Definir uma persona específica para o modelo adotar, dando-lhe contexto de expertise, vocabulário e profundidade adequados à tarefa.
+
+**Por que escolhemos:** O prompt v1 dizia apenas "Você é um assistente" — persona genérica que não guia o modelo sobre **como** pensar ou **que nível** de profundidade entregar. Ao definir "Você é um Product Manager sênior com 10 anos de experiência em produtos digitais", o modelo adota um vocabulário de requisitos ágeis (persona, valor de negócio, critérios testáveis) e evita respostas rasas ou técnicas demais.
+
+**Como aplicamos:** No `system_prompt`, a primeira frase define a persona: "Você é um Product Manager sênior com 10 anos de experiência em produtos digitais, especialista em transformar relatos de bugs em User Stories ágeis de alta qualidade." Isso influencia o tom, a terminologia e a profundidade de toda a resposta.
+
+### 3. Skeleton of Thought (adicional)
+
+**O que é:** Estruturar a resposta em etapas explícitas antes de gerar o conteúdo final, como um checklist mental que o modelo deve seguir.
+
+**Por que escolhemos:** O prompt v1 pedia "crie uma user story" sem direcionar **como** chegar lá. Isso levava o modelo a pular etapas importantes (como identificar o contexto técnico ou a persona correta). Ao definir 5 passos (Análise → Persona → User Story → Critérios de Aceitação → Contexto Técnico), forçamos o modelo a seguir um raciocínio completo e estruturado.
+
+**Como aplicamos:** No `system_prompt`, criamos uma seção "Processo de trabalho (Skeleton of Thought)" com 5 passos numerados. Cada passo define o que o modelo deve fazer antes de escrever a saída final: analisar o problema, identificar a persona, escrever a User Story, listar os Critérios de Aceitação e preservar o contexto técnico relevante.
+
+## Iterações de Avaliação
+
+### Iteração 1
+
+Resultado da primeira avaliação do prompt v2:
+
+| Métrica | Resultado | Status |
+| --- | ---: | --- |
+| Helpfulness | 0.85 | Aprovado |
+| Correctness | 0.80 | Aprovado |
+| F1-Score | 0.64 | Reprovado |
+| Clarity | 0.74 | Reprovado |
+| Precision | 0.96 | Aprovado |
+| Média geral | 0.7987 | Reprovado |
+
+**Diagnóstico:** A precisão ficou alta, então o prompt não estava inventando muitos dados. O problema principal foi F1-Score, especialmente recall: a resposta gerada deixava de cobrir informações que aparecem nas referências, como critérios técnicos, contexto do bug, exemplos de cálculo e seções específicas para casos complexos. A métrica de Clarity também ficou abaixo do mínimo, indicando que a estrutura precisava ser mais previsível.
+
+**Ajuste aplicado na Iteração 2:** O prompt passou a classificar o bug como simples, médio ou complexo e a escolher uma estrutura de saída adequada. Também foram adicionadas instruções para preservar números, endpoints, logs, severidade, impacto de negócio e criar seções técnicas quando o relato trouxer esses dados.
+
+### Iteração 2
+
+Depois do ajuste, o prompt foi publicado novamente no LangSmith e avaliado contra o dataset com 15 exemplos.
+
+| Métrica | Resultado | Status |
+| --- | ---: | --- |
+| Helpfulness | 0.95 | Aprovado |
+| Correctness | 0.92 | Aprovado |
+| F1-Score | 0.87 | Aprovado |
+| Clarity | 0.95 | Aprovado |
+| Precision | 0.96 | Aprovado |
+| Média geral | 0.9298 | Aprovado |
+
+**Conclusão:** Todas as métricas ficaram acima de 0.8, incluindo a média geral. Como o critério de parada do enunciado é repetir o ciclo até todas as métricas ficarem maiores ou iguais a 0.8, não foi necessário executar novas iterações após a Iteração 2.
 
 ---
 

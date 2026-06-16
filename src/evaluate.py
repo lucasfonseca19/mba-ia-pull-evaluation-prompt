@@ -13,6 +13,7 @@ Este script:
 Suporta múltiplos providers de LLM:
 - OpenAI (gpt-4o, gpt-4o-mini)
 - Google Gemini (gemini-2.5-flash)
+- OpenCode Go (endpoint compatível com OpenAI)
 
 Configure o provider no arquivo .env através da variável LLM_PROVIDER.
 """
@@ -26,8 +27,13 @@ from dotenv import load_dotenv
 from langsmith import Client
 from langchain import hub
 from langchain_core.prompts import ChatPromptTemplate
-from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
-from metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
+
+try:
+    from .utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
+    from .metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
+except ImportError:
+    from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
+    from metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
 
 load_dotenv()
 
@@ -288,6 +294,8 @@ def main():
     required_vars = ["LANGSMITH_API_KEY", "LLM_PROVIDER"]
     if provider == "openai":
         required_vars.append("OPENAI_API_KEY")
+    elif provider == "opencode_go":
+        required_vars.append("OPENCODE_GO_API_KEY")
     elif provider in ["google", "gemini"]:
         required_vars.append("GOOGLE_API_KEY")
 

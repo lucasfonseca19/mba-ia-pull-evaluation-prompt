@@ -17,6 +17,7 @@ MÉTRICAS ESPECÍFICAS PARA BUG TO USER STORY (4):
 Suporta múltiplos providers de LLM:
 - OpenAI (gpt-4o, gpt-4o-mini)
 - Google Gemini (gemini-2.5-flash)
+- OpenCode Go (endpoint compatível com OpenAI)
 
 Configure o provider no arquivo .env através da variável LLM_PROVIDER.
 """
@@ -27,7 +28,11 @@ import re
 from typing import Dict, Any
 from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage, HumanMessage
-from utils import get_eval_llm
+
+try:
+    from .utils import get_eval_llm
+except ImportError:
+    from utils import get_eval_llm
 
 load_dotenv()
 
@@ -35,7 +40,7 @@ load_dotenv()
 def get_evaluator_llm():
     """
     Retorna o LLM configurado para avaliação.
-    Suporta OpenAI e Google Gemini baseado no .env
+    Suporta OpenAI, Google Gemini e OpenCode Go baseado no .env
     """
     return get_eval_llm(temperature=0)
 
